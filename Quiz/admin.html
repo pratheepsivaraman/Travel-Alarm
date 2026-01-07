@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="admin-box">
+            <h2>Admin Panel</h2>
+            <div class="admin-layout">
+                <!-- Left Column: Add Question -->
+                <div class="admin-column">
+                    <h3>Add New Question</h3>
+                    <form id="add-question-form">
+                        <div class="input-group">
+                            <label for="course">Select Course</label>
+                            <select id="course" name="course" required></select>
+                        </div>
+                        <div class="input-group">
+                            <label for="question">Question Text</label>
+                            <textarea id="question" name="question" rows="3" placeholder="Enter the question text" required></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label for="option1">Option 1</label>
+                            <input type="text" id="option1" class="option-input" placeholder="Enter option 1" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="option2">Option 2</label>
+                            <input type="text" id="option2" class="option-input" placeholder="Enter option 2" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="option3">Option 3</label>
+                            <input type="text" id="option3" class="option-input" placeholder="Enter option 3" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="option4">Option 4</label>
+                            <input type="text" id="option4" class="option-input" placeholder="Enter option 4" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="answer">Correct Answer</label>
+                            <select id="answer" name="answer" required></select>
+                        </div>
+                        <button type="submit" class="btn">Add Question</button>
+                    </form>
+                </div>
+                <!-- Right Column: Add Course -->
+                <div class="admin-sub-column">
+                    <h3>Add New Course</h3>
+                    <form id="add-course-form">
+                        <div class="input-group">
+                            <label for="new-course-name">Course Name</label>
+                            <input type="text" id="new-course-name" placeholder="e.g., python" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="new-course-desc">Course Description</label>
+                            <input type="text" id="new-course-desc" placeholder="A brief description" required>
+                        </div>
+                        <button type="submit" class="btn">Add Course</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="admin.js"></script>
+</body>
+</html>
