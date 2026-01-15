@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // --- Admin Configuration ---
 const ADMIN_EMAILS = ['pratheepkumar2304@gmail.com', 'sivaramanpratheep@gmail.com'];

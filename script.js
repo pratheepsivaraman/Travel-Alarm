@@ -18,14 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     sessionStorage.setItem('userId', data.userId);
-                    sessionStorage.setItem('userEmail', data.email);
-                    sessionStorage.setItem('isAdmin', data.isAdmin || false); // Store admin flag
-                    
-                    if (data.isAdmin && data.email === 'sivaramanpratheep@gmail.com') {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'courses.html';
-                    }
+                    window.location.href = 'courses.html';
                 } else {
                     alert(data.message);
                 }
@@ -46,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmPassword = document.getElementById('confirm-password').value;
 
             if (password !== confirmPassword) {
-                alert('Passwords do not match. Please try again.');
+                alert('Passwords do not match. Please enter the same password.');
                 return;
             }
 
@@ -73,49 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Course Selection Page Logic ---
-    const courseSelectionBox = document.querySelector('.course-selection-box');
-    if (courseSelectionBox) {
-        // Add Admin button if user is admin (and not the auto-redirected admin)
-        if (sessionStorage.getItem('isAdmin') === 'true' && sessionStorage.getItem('userEmail') !== 'sivaramanpratheep@gmail.com') {
-            const adminButton = document.createElement('a');
-            adminButton.href = 'admin.html';
-            adminButton.textContent = 'Admin Panel';
-            adminButton.classList.add('btn', 'admin-btn');
-            courseSelectionBox.insertAdjacentElement('afterend', adminButton);
-        }
-
-        const courseList = document.querySelector('.course-list');
-
-        async function fetchAndDisplayCourses() {
-            try {
-                const response = await fetch('http://localhost:3000/courses');
-                const courses = await response.json();
-                
-                courseList.innerHTML = ''; // Clear placeholder
-                courses.forEach(course => {
-                    const courseItem = document.createElement('div');
-                    courseItem.classList.add('course-item');
-                    courseItem.setAttribute('data-course', course.name);
-                    
-                    courseItem.innerHTML = `
-                        <h3>${course.name.charAt(0).toUpperCase() + course.name.slice(1)}</h3>
-                        <p>${course.description}</p>
-                    `;
-                    
-                    courseItem.addEventListener('click', () => {
-                        window.location.href = `quiz.html?course=${course.name}`;
-                    });
-                    
-                    courseList.appendChild(courseItem);
-                });
-
-            } catch (error) {
-                console.error('Failed to fetch courses:', error);
-                courseList.innerHTML = '<p>Could not load courses. Please try again later.</p>';
-            }
-        }
-
-        fetchAndDisplayCourses();
+    const courseItems = document.querySelectorAll('.course-item');
+    if (courseItems.length > 0) {
+        courseItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const course = item.getAttribute('data-course');
+                window.location.href = `quiz.html?course=${course}`;
+            });
+        });
     }
 
     // --- Quiz Page Logic ---
@@ -124,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const course = urlParams.get('course');
         
+        // Check if user is logged in
         if (!sessionStorage.getItem('userId')) {
             window.location.href = 'index.html';
             return;
@@ -135,39 +94,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const optionsContainer = document.getElementById('options-container');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
-
-        let courseQuestions = [];
-
-        async function fetchQuestions() {
-            try {
-                const response = await fetch(`http://localhost:3000/questions/${course}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch questions.');
-                }
-                const questionsFromServer = await response.json();
-                // The mysql2 driver and res.json handle the parsing, so the 'options' field is already an array.
-                courseQuestions = questionsFromServer;
-                
-                if (courseQuestions.length > 0) {
-                    initializeQuiz();
-                } else {
-                    displayError('No questions found for this course.');
-                }
-            } catch (error) {
-                console.error('Fetch questions error:', error);
-                displayError('Could not load quiz. Please try again.');
-            }
-        }
-
-        function displayError(message) {
-            questionEl.textContent = message;
-            optionsContainer.style.display = 'none';
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            timerEl.style.display = 'none';
-        }
         
-        function initializeQuiz() {
+        const questions = {
+            javascript: [
+                { question: 'What is the correct way to declare a variable in JavaScript?', options: ['var', 'let', 'const', 'all of the above'], answer: 'all of the above' },
+                { question: 'Which of the following is NOT a JavaScript data type?', options: ['string', 'boolean', 'number', 'float'], answer: 'float' }
+            ],
+            html: [
+                { question: 'What does HTML stand for?', options: ['Hyper Text Markup Language', 'High Tech Markup Language', 'Hyperlinks and Text Markup Language', 'Home Tool Markup Language'], answer: 'Hyper Text Markup Language' },
+                { question: 'Which HTML tag is used to define an internal style sheet?', options: ['<style>', '<script>', '<css>', '<link>'], answer: '<style>' }
+            ],
+            css: [
+                { question: 'What does CSS stand for?', options: ['Cascading Style Sheets', 'Creative Style Sheets', 'Computer Style Sheets', 'Colorful Style Sheets'], answer: 'Cascading Style Sheets' },
+                { question: 'Which property is used to change the background color of an element?', options: ['background-color', 'color', 'bgcolor', 'background'], answer: 'background-color' }
+            ]
+        };
+
+        const courseQuestions = questions[course];
+
+        if (course && courseQuestions) {
             let currentQuestionIndex = 0;
             let userAnswers = new Array(courseQuestions.length).fill(null);
             let time = 600;
@@ -239,12 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                const email = sessionStorage.getItem('userEmail');
+                const userId = sessionStorage.getItem('userId');
                 try {
                     await fetch('http://localhost:3000/submit', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, course, score })
+                        body: JSON.stringify({ userId, course, score })
                     });
                 } catch (error) {
                     console.error('Failed to submit score:', error);
@@ -275,12 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadQuestion();
                 }
             });
-        }
-        
-        if (course) {
-            fetchQuestions();
         } else {
-            displayError('No course selected.');
+            questionEl.textContent = 'Could not load quiz. Please select a valid course.';
+            optionsContainer.style.display = 'none';
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            timerEl.style.display = 'none';
         }
     }
 });
